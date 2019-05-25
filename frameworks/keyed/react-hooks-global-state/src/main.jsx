@@ -70,12 +70,11 @@ function doAction(action) {
 
 const GlyphIcon = <span className="glyphicon glyphicon-remove" aria-hidden="true"></span>;
 
-const Row = memo(({ item }) => {
-  const [selected] = useGlobalState('selected');
-  const select = useCallback(() => doAction({ type: 'SELECT', id: item.id }), []),
-    remove = useCallback(() => doAction({ type: 'REMOVE', id: item.id }), []);
+const Row = memo(({ item, selected }) => {
+  const select = useCallback(() => doAction({ type: 'SELECT', id: item.id }), []);
+  const remove = useCallback(() => doAction({ type: 'REMOVE', id: item.id }), []);
 
-  return (<tr className={item.id === selected ? "danger" : ""}>
+  return (<tr className={selected ? "danger" : ""}>
     <td className="col-md-1">{item.id}</td>
     <td className="col-md-4"><a onClick={select}>{item.label}</a></td>
     <td className="col-md-1"><a onClick={remove}>{GlyphIcon}</a></td>
@@ -111,12 +110,13 @@ const Jumbotron = memo(() => (
 
 const Main = () => {
   const [data] = useGlobalState('data');
+  const [selected] = useGlobalState('selected');
 
   return (<div className="container">
     <Jumbotron />
     <table className="table table-hover table-striped test-data"><tbody>
       {data.map(item => (
-        <Row key={item.id} item={item} />
+        <Row key={item.id} item={item} selected={item.id === selected} />
       ))}
     </tbody></table>
     <span className="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
