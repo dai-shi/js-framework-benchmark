@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { createStore } from 'redux';
 import { Provider, useTrackedState, useDispatch } from 'react-tracked';
 
 function random(max) {
