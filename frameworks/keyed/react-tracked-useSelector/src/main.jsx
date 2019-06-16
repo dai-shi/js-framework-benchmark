@@ -23,7 +23,8 @@ function buildData(count) {
   return data;
 }
 
-const useValue = () => useReducer((state, action) => {
+const initialState = { data: [], selected: 0 };
+const reducer = (state, action) => {
   const { data, selected } = state;
   switch (action.type) {
     case 'RUN':
@@ -50,7 +51,8 @@ const useValue = () => useReducer((state, action) => {
       return { data: [data[0], data[998], ...data.slice(2, 998), data[1], data[999]], selected };
   }
   return state;
-}, { data: [], selected: 0 });
+};
+const useValue = () => useReducer(reducer, initialState);
 
 function select(id) {
   return { type: 'SELECT', id };
@@ -127,7 +129,7 @@ const Main = () => {
       <div className="jumbotron">
         <div className="row">
           <div className="col-md-6">
-            <h1>React + Redux + hooks</h1>
+            <h1>react-tracked useSelector</h1>
           </div>
           <div className="col-md-6">
             <div className="row">

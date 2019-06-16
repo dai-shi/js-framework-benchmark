@@ -128,7 +128,7 @@ const Main = () => {
       <div className="jumbotron">
         <div className="row">
           <div className="col-md-6">
-            <h1>React + Redux + hooks</h1>
+            <h1>reactive-react-redux useSelector</h1>
           </div>
           <div className="col-md-6">
             <div className="row">

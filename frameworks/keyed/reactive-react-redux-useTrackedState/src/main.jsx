@@ -126,7 +126,7 @@ const Main = () => {
       <div className="jumbotron">
         <div className="row">
           <div className="col-md-6">
-            <h1>reactive-react-redux</h1>
+            <h1>reactive-react-redux useTrackedState</h1>
           </div>
           <div className="col-md-6">
             <div className="row">
