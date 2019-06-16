@@ -4,7 +4,7 @@
   "description": "React demo",
   "main": "index.js",
   "js-framework-benchmark": {
-    "frameworkVersionFromPackage": "react:react-tracked"
+    "frameworkVersionFromPackage": "react-tracked"
   },
   "scripts": {
     "build-dev": "webpack --watch",
