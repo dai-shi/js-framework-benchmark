@@ -42,8 +42,9 @@ const reducer = (state , action) => {
       return { data: newData, selected };
     }
     case "REMOVE": {
+      const idx = data.findIndex(d => d.id === action.id);
       const newData = data.slice();
-      newData.splice(data.indexOf(action.item), 1);
+      newData.splice(idx, 1);
       return { data: newData, selected };
     }
     case "SELECT":
@@ -67,7 +68,7 @@ const GlyphIcon = <span className="glyphicon glyphicon-remove" aria-hidden="true
 const Row = React.memo(({ data, selected }) => {
   const dispatch = useDispatch();
   const select = useCallback(() => { dispatch({ type: "SELECT", id: data.id }); }, [data]);
-  const remove = useCallback(() => { dispatch({ type: "REMOVE", item: data }); }, [data]);
+  const remove = useCallback(() => { dispatch({ type: "REMOVE", id: data.id }); }, [data]);
   return (
     <tr className={selected ? "danger" : ""}>
       <td className="col-md-1">{data.id}</td>
