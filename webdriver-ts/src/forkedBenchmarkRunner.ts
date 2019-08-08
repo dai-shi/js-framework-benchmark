@@ -7,8 +7,10 @@ const chromeLauncher = require('chrome-launcher');
 
 import * as fs from 'fs';
 import * as path from 'path';
-import {JSONResult, config, FrameworkData, BenchmarkError, ErrorsAndWarning, BenchmarkOptions, BenchmarkDriverOptions} from './common'
+import {TConfig, config as defaultConfig, JSONResult, FrameworkData, BenchmarkError, ErrorsAndWarning, BenchmarkOptions, BenchmarkDriverOptions} from './common'
 import * as R from 'ramda';
+
+let config:TConfig = defaultConfig;
 
 // necessary to launch without specifiying a path
 var chromedriver:any = require('chromedriver');
@@ -98,8 +100,8 @@ function extractRawValue(results: any, id: string) {
     if (!audits) return null;
     let audit_with_id = audits[id];
     if (typeof audit_with_id === 'undefined') return null;
-    if (typeof audit_with_id.rawValue === 'undefined') return null;
-    return audit_with_id.rawValue;
+    if (typeof audit_with_id.numericValue === 'undefined') return null;
+    return audit_with_id.numericValue;
 }
 
  function rmDir(dirPath: string) {
@@ -151,7 +153,9 @@ function extractRawValue(results: any, id: string) {
             console.log("error running lighthouse", error);
             await chrome.kill();
             throw error;
-        } 
+        }
+        //console.log("lh result", results);
+
         let LighthouseData: LighthouseData = {
             TimeToConsistentlyInteractive: extractRawValue(results.lhr, 'interactive'),
             ScriptBootUpTtime: Math.max(16, extractRawValue(results.lhr, 'bootup-time')),
@@ -323,7 +327,8 @@ interface Result<T> {
 }
 
 
-function writeResult<T>(res: Result<T>, dir: string) {
+function writeResult<T>(res: Result<T>) {
+    if (!config.WRITE_RESULTS) return;
     let benchmark = res.benchmark;
     let framework = res.framework.name;
     let keyed = res.framework.keyed;
@@ -352,7 +357,7 @@ function writeResult<T>(res: Result<T>, dir: string) {
             "standardDeviation": s.stdev(true),
             "values": data
         }
-        fs.writeFileSync(`${dir}/${fileName(res.framework, resultKind)}`, JSON.stringify(result), {encoding: "utf8"});
+        fs.writeFileSync(`${config.RESULTS_DIRECTORY}/${fileName(res.framework, resultKind)}`, JSON.stringify(result), {encoding: "utf8"});
     }
 }
 
@@ -372,7 +377,7 @@ async function runCPUBenchmark(framework: FrameworkData, benchmark: Benchmark, b
     let errors: BenchmarkError[] = [];
     let warnings: String[] = [];
 
-    
+
     console.log("benchmarking ", framework, benchmark.id);
     let driver = buildDriver(benchmarkOptions);
     console.timeLog("chromedriver", "runCPU started");
@@ -384,7 +389,7 @@ async function runCPUBenchmark(framework: FrameworkData, benchmark: Benchmark, b
                 console.timeLog("chromedriver", "before get");
                 await driver.get(`http://localhost:${benchmarkOptions.port}/${framework.uri}/`);
                 console.timeLog("chromedriver", "after get");
-                
+
                 // await (driver as any).sendDevToolsCommand('Network.enable');
                 // await (driver as any).sendDevToolsCommand('Network.emulateNetworkConditions', {
                     //     offline: false,
@@ -421,7 +426,7 @@ async function runCPUBenchmark(framework: FrameworkData, benchmark: Benchmark, b
             }
         }
         let results = await computeResultsCPU(driver, benchmarkOptions, framework, benchmark, warnings);
-        await writeResult({ framework: framework, results: results, benchmark: benchmark }, benchmarkOptions.outputDirectory);
+        await writeResult({ framework: framework, results: results, benchmark: benchmark });
         console.log("QUIT");
         await driver.close();
         await driver.quit();
@@ -475,14 +480,13 @@ async function runMemBenchmark(framework: FrameworkData, benchmark: Benchmark, b
         } catch (e) {
             errors.push(await registerError(driver, framework, benchmark, e, ));
             console.log(e);
-            throw e;
+            if (config.EXIT_ON_ERROR) { throw "Benchmarking failed" }
         } finally {
             await driver.close();
             await driver.quit();
-            if (config.EXIT_ON_ERROR) { throw "Benchmarking failed" }
         }
     }
-    await writeResult({ framework: framework, results: allResults, benchmark: benchmark }, benchmarkOptions.outputDirectory);
+    await writeResult({ framework: framework, results: allResults, benchmark: benchmark });
     return {errors, warnings};
 }
 
@@ -501,7 +505,7 @@ async function runStartupBenchmark(framework: FrameworkData, benchmark: Benchmar
             throw error;
         }
     }
-    await writeResult({framework: framework, results: results, benchmark: benchmark}, benchmarkOptions.outputDirectory);
+    await writeResult({framework: framework, results: results, benchmark: benchmark});
     return {errors, warnings: []};
 }
 
@@ -526,36 +530,23 @@ export async function executeBenchmark(frameworks: FrameworkData[], keyed: boole
     return errorsAndWarnings;
 }
 
-export async function benchmarkWithRetry(frameworks: FrameworkData[], keyed: boolean, frameworkName: string, benchmarkName: string, benchmarkOptions: BenchmarkOptions, retryCount: number): Promise<ErrorsAndWarning> {
-    try {
-        let errorsAndWarnings = await executeBenchmark(frameworks, keyed, frameworkName, benchmarkName, benchmarkOptions);
+export async function performBenchmark(frameworks: FrameworkData[], keyed: boolean, frameworkName: string, benchmarkName: string, benchmarkOptions: BenchmarkOptions): Promise<ErrorsAndWarning> {
+    let errorsAndWarnings = await executeBenchmark(frameworks, keyed, frameworkName, benchmarkName, benchmarkOptions);
         if (config.LOG_DEBUG) console.log("benchmark finished - got errors promise", errorsAndWarnings);
         process.send(errorsAndWarnings);
         process.exit(0);
         return errorsAndWarnings;
-    } catch (err) {
-        console.log("error running benchmark", err);
-        if (retryCount>1) {
-            console.log("************* RETRY BENCHMARK *******************", retryCount);
-            benchmarkWithRetry(frameworks, keyed, frameworkName, benchmarkName, benchmarkOptions, retryCount-1);
-        } else {
-            console.log("max retry reached");
-            process.exit(1);
-        }
-    }
 }
 
 process.on('message', (msg) => {
+    config = msg.config;
+    console.log("START BENCHMARK. Write results? ", config.WRITE_RESULTS);
     if (config.LOG_DEBUG) console.log("child process got message", msg);
 
     let {frameworks, keyed, frameworkName, benchmarkName, benchmarkOptions} : {frameworks: FrameworkData[], keyed: boolean, frameworkName: string, benchmarkName: string, benchmarkOptions: BenchmarkOptions} = msg;
     if (!benchmarkOptions.port) benchmarkOptions.port = config.PORT.toFixed();
-    const MAX_RETRY = 3;
-            try {
-                benchmarkWithRetry(frameworks, keyed, frameworkName, benchmarkName, benchmarkOptions, MAX_RETRY)
-            } catch (err) {
-                console.log("direct error", err);
-                process.exit(1);
-            }
-    }
-  );
+        performBenchmark(frameworks, keyed, frameworkName, benchmarkName, benchmarkOptions).catch((err) => {
+        console.log("error in forkedBenchmarkRunner", err);
+        process.exit(1);
+    });
+});
