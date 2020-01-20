@@ -46,7 +46,7 @@ There are currently ~60 framework entries in this repository. Installing (and ma
 
 ### 1. Prerequisites
 
-Have *node.js (>=7.6)* installed. If you want to do yourself a favour use nvm for that and install yarn. The benchmark has been tested with node 8.4.0.
+Have *node.js (>=10.0)* installed. If you want to do yourself a favour use nvm for that and install yarn. The benchmark has been tested with node v10.16.3.
 For some frameworks you'll also need *java* (>=8, e.g. openjdk-8-jre on ubuntu).
 Please make sure that the following command work before trying to build:
 ```
@@ -241,6 +241,7 @@ runs the test for all frameworks that contain either angular or bob, which means
 * You can also run implementations by passing their directory names (cd to webdriver-ts):
 `npm run bench keyed/angular keyed/react` or if you want to pass more options it becomes: 
 `npm run bench -- --count 3 keyed/angular keyed/react`.
+* You can run all of the frameworks you've installed using `npm run bench -- --installed`
 * If you can't get one framework to compile or run, just move it out of the root directory and remove it from common.ts, recompile and re-run
 * To achieve good precision you should run each framework often enough. I recommend at least 10 times, more is better. The result table contains the mean and the standard deviation. You can seen the effect on the latter pretty well if you increase the count.
 * One can check whether an implementation is keyed or non-keyed via `npm run isKeyed` in the webdriver-ts directory. You can limit which frameworks to check in the same way as the webdriver test runner like e.g. `npm run isKeyed -- --framework svelte`. The program will report an error if a benchmark implementation is incorrectly classified.
@@ -259,6 +260,7 @@ Contributions are very welcome. Please use the following rules:
 * **Please make sure your implementation is validated by the test tool.** cd to webdriver-ts and invoke it with `npm run check [keyed|non-keyed]/[FrameworkName]`. It'll print an error if your framework behaves other as specified. It'll print a big ERROR explaining if it isn't happy with the implementation.
 * Please don't commit any of the result file webdriver-ts/table.html, webdriver-ts-results/src/results.ts or webdriver-ts-results/table.html. I use to run the benchmarks after merging and publish updated (temporary) results.
 * The latest stable chrome can be used regarding web features and language level (babel-preset-env "last 1 chrome versions")
+* The vanillajs implementations and some others include code that try to approximate the repaint duration through javascript code. Implemenatations are not required to include that measurement. Remember: The real measurements are taken by the automated test driver by examining chrome timeline entries.
 * **Please don't over-optimize. Other contributors will review your implementation so beware of discussions ([#521](https://github.com/krausest/js-framework-benchmark/pull/521), [#519](https://github.com/krausest/js-framework-benchmark/pull/519), [#430](https://github.com/krausest/js-framework-benchmark/issues/430)) and rejection if the community finds you cheating. When are you safe?**
   * If the initial rendering is able to render the selection state
   * The implementation uses only the idiomatic style of its library
@@ -268,3 +270,12 @@ Tip: If you start with your implementation do not take vanillajs as the referenc
 This work is derived from a benchmark that Richard Ayotte published on https://gist.github.com/RichAyotte/a7b8780341d5e75beca7 and adds more framework and more operations. Thanks for the great work.
 
 Thanks to Baptiste Augrain for making the benchmarks more sophisticated and adding frameworks.
+
+## History
+Frameworks without activity on github or npm for more than a year will be removed. 
+The following frameworks were removed 9/16/2019:
+- [x] angular-light Last commit Nov 30, 2017
+- [x] nx. Last commit Feb 2017
+- [x]  maik-h  Last commit Dec 15, 2017
+- [x] rivets Last commit Oct 22, 2016
+- [x] tsers. Last commit Jun 19, 2016

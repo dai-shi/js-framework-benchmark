@@ -8,13 +8,10 @@ export interface JSONResult {
         standardDeviation: number, median: number, values: Array<number>
 }
 
-export interface BenchmarkError {
-    imageFile : string;
-    exception : string
-}
+export type TBenchmarkStatus = 'OK'|'TEST_FAILED'|'TECHNICAL_ERROR';
 
-export interface ErrorsAndWarning {
-    errors: BenchmarkError[];
+export interface ErrorAndWarning {
+    error: String;
     warnings: String[];
 }
 
@@ -46,7 +43,7 @@ export let config = {
     LOG_DETAILS: false,
     LOG_DEBUG: false,
     LOG_TIMELINE: false,
-    EXIT_ON_ERROR: false,
+    EXIT_ON_ERROR: null as boolean, // set from command line
     STARTUP_DURATION_FROM_EVENTLOG: true,
     STARTUP_SLEEP_DURATION: 1000,
     FORK_CHROMEDRIVER: true,
@@ -183,7 +180,7 @@ export async function loadFrameworkVersionInformation(matchPredicate: IMatchPred
         let directories = fs.readdirSync(path.resolve(frameworksPath, keyedType));
 
         for (let directory of directories) {
-            let pathInFrameworksDir = path.join(keyedType, directory);
+            let pathInFrameworksDir = keyedType + "/" + directory;
             if (matchPredicate(pathInFrameworksDir)) {
                 let fi = loadFrameworkInfo(pathInFrameworksDir);
                 if (fi!=null) results.push(fi);
