@@ -34,6 +34,6 @@
   "dependencies": {
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-hooks-global-state": "0.14.0"
+    "react-hooks-global-state": "1.0.0"
   }
 }
