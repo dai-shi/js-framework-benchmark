@@ -24,7 +24,7 @@ function buildData(count) {
   return data;
 }
 
-const { GlobalStateProvider, useGlobalState, setGlobalState } = createGlobalState({ data: [], selected: 0 });
+const { useGlobalState, setGlobalState } = createGlobalState({ data: [], selected: 0 });
 
 function doAction(action) {
   switch (action.type) {
@@ -125,9 +125,7 @@ const Main = () => {
 
 ReactDOM.render(
   (
-    <GlobalStateProvider>
-      <Main />
-    </GlobalStateProvider>
+    <Main />
   ),
   document.getElementById('main')
 );
