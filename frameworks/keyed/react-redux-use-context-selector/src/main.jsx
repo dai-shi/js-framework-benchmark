@@ -82,13 +82,14 @@ const store = createStore((state = { data: [], selected: 0 }, action) => {
 const GlyphIcon = <span className="glyphicon glyphicon-remove" aria-hidden="true"></span>;
 
 const Row = React.memo(({ data }) => {
-  const isSelected = useSelector((state) => state.selected === data.id);
+  const dataId = data.id;
+  const isSelected = useSelector(useCallback((state) => state.selected === dataId, [dataId]));
   const dispatch = useDispatch();
-  const select = useCallback(() => { dispatch({ type: "SELECT", id: data.id }); }, [data]);
+  const select = useCallback(() => { dispatch({ type: "SELECT", id: dataId }); }, [dataId]);
   const remove = useCallback(() => { dispatch({ type: "REMOVE", item: data }); }, [data]);
   return (
     <tr className={isSelected ? "danger" : ""}>
-      <td className="col-md-1">{data.id}</td>
+      <td className="col-md-1">{dataId}</td>
       <td className="col-md-4"><a onClick={select}>{data.label}</a></td>
       <td className="col-md-1"><a onClick={remove}>{GlyphIcon}</a></td>
       <td className="col-md-6"></td>
@@ -97,7 +98,7 @@ const Row = React.memo(({ data }) => {
 });
 
 const RowList = React.memo(() => {
-  const rows = useSelector((state) => state.data);
+  const rows = useSelector(useCallback((state) => state.data, []));
   return rows.map((data) => <Row key={data.id} data={data} />);
 });
 
@@ -119,7 +120,7 @@ const Main = () => {
     <div className="container">
       <div className="jumbotron">
         <div className="row">
-          <div className="col-md-6"><h1>React + Redux</h1></div>
+          <div className="col-md-6"><h1>Redux + useContextSelector</h1></div>
           <div className="col-md-6"><div className="row">
             <Button id="run" title="Create 1,000 rows" cb={run} />
             <Button id="runlots" title="Create 10,000 rows" cb={runLots} />
