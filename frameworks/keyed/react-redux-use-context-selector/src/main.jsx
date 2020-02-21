@@ -18,7 +18,8 @@ const Provider = ({ store, children }) => {
     </DispatchContext.Provider>
   );
 };
-const useDispatch = () => useContextSelector(DispatchContext, x => x);
+const identity = x => x;
+const useDispatch = () => useContextSelector(DispatchContext, identity);
 const useSelector = (selector) => useContextSelector(StateContext, selector);
 
 const A = ["pretty", "large", "big", "small", "tall", "short", "long", "handsome", "plain", "quaint", "clean",
