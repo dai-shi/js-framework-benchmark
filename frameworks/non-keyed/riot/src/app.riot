@@ -44,10 +44,10 @@
         <tr each={ row in state.rows } class={ rowClass(row) }>
           <td class='col-md-1'>{ row.id }</td>
           <td class='col-md-4'>
-            <a onclick={ () => select(row) }>{ row.label }</a>
+            <a onclick={() => select(row.id)}>{ row.label }</a>
           </td>
           <td class='col-md-1'>
-            <a onclick={ () => remove(row) }><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></a>
+            <a><span onclick={() => remove(row.id)} class='glyphicon glyphicon-remove' aria-hidden='true'></span></a>
           </td>
           <td class='col-md-6'></td>
         </tr>
@@ -77,12 +77,12 @@
         this.store.add()
         this.renderWithNewState()
       },
-      remove(item) {
-        this.store.delete(item.id)
+      remove(id) {
+        this.store.delete(id)
         this.renderWithNewState()
       },
-      select(item) {
-        this.store.select(item.id)
+      select(id) {
+        this.store.select(id)
         this.renderWithNewState()
       },
       run() {

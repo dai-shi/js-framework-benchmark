@@ -2,13 +2,14 @@
 FROM ubuntu:19.10
 COPY install_rust.sh /root/
 RUN echo "unsafe-perm = true" > /root/.npmrc
+RUN echo "export NG_CLI_ANALYTICS=ci" >> /root/.npmrc
 RUN echo "{ \"allow_root\": true }" >  /root/.bowerrc
 
 # replace shell with bash so we can source files
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN apt-get update
-RUN apt-get install -y libtinfo5 libghc-zlib-dev rsync ghc haskell-stack curl g++ make git openjdk-8-jdk dos2unix
+RUN apt-get install -y m4 libtinfo5 libghc-zlib-dev rsync ghc haskell-stack curl g++ make git openjdk-8-jdk dos2unix
 
 ENV NVM_DIR /usr/local/nvm
 RUN mkdir -p $NVM_DIR
@@ -34,7 +35,7 @@ RUN mkdir /src
 
 COPY package.json /server
 WORKDIR /server
-RUN npm install 
+RUN npm install
 
 # Volume before chown changes owwner
 VOLUME /src
