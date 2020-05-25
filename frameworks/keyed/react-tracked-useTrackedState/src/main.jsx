@@ -1,6 +1,6 @@
 import React, { useCallback, useReducer } from "react";
 import ReactDOM from "react-dom";
-import { createContainer } from "react-tracked";
+import { createContainer, memo } from "react-tracked";
 
 const A = ["pretty", "large", "big", "small", "tall", "short", "long", "handsome", "plain", "quaint", "clean",
   "elegant", "easy", "angry", "crazy", "helpful", "mushy", "odd", "unsightly", "adorable", "important", "inexpensive",
@@ -70,7 +70,7 @@ const {
 
 const GlyphIcon = <span className="glyphicon glyphicon-remove" aria-hidden="true"></span>;
 
-const Row = React.memo(({ data, selected }) => {
+const Row = memo(({ data, selected }) => {
   const dispatch = useDispatch();
   const select = useCallback(() => { dispatch({ type: "SELECT", id: data.id }); }, [data]);
   const remove = useCallback(() => { dispatch({ type: "REMOVE", id: data.id }); }, [data]);
@@ -84,12 +84,12 @@ const Row = React.memo(({ data, selected }) => {
   )
 });
 
-const RowList = React.memo(() => {
+const RowList = memo(() => {
   const state = useTrackedState();
   return state.data.map((data) => <Row key={data.id} data={data} selected={data.id === state.selected}/>);
 });
 
-const Button = React.memo(({ id, title, cb }) => (
+const Button = memo(({ id, title, cb }) => (
   <div className="col-sm-6 smallpad">
     <button type="button" className="btn btn-primary btn-block" id={id} onClick={cb}>{title}</button>
   </div>
