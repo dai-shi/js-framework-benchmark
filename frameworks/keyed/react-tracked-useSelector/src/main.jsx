@@ -1,6 +1,6 @@
 import React, { useCallback, useReducer } from "react";
 import ReactDOM from "react-dom";
-import { Provider, useDispatch, useSelector } from "react-tracked";
+import { createContainer } from "react-tracked";
 
 const A = ["pretty", "large", "big", "small", "tall", "short", "long", "handsome", "plain", "quaint", "clean",
   "elegant", "easy", "angry", "crazy", "helpful", "mushy", "odd", "unsightly", "adorable", "important", "inexpensive",
@@ -61,6 +61,11 @@ const reducer = (state, action) => {
   return state;
 };
 const useValue = () => useReducer(reducer, initialState);
+const {
+  Provider,
+  useUpdate: useDispatch,
+  useSelector,
+} = createContainer(useValue);
 
 const GlyphIcon = <span className="glyphicon glyphicon-remove" aria-hidden="true"></span>;
 
@@ -120,6 +125,6 @@ const Main = () => {
 };
 
 ReactDOM.render(
-  <Provider useValue={useValue}><Main /></Provider>,
+  <Provider><Main /></Provider>,
   document.getElementById("main")
 );
